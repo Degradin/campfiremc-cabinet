@@ -7,10 +7,12 @@
     "install:client": "npm install --prefix client",
     "install:all": "npm run install:server && npm run install:client",
     "start:server": "npm start --prefix server",
-    "start:client": "npm start --prefix client",
-    "start": "concurrently \"npm run start:server\" \"npm run start:client\""
+    "start:client": "cross-env NODE_PATH=src npm start --prefix client",
+    "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
+    "dev": "npm start"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "cross-env": "^10.1.0"
   }
 }
