@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/AuthContext';
+import { useAuth } from '../hooks/AuthContext';
 import axios from 'axios';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 
 // TODO: Use environment variable for API URL
 const API_URL = 'http://localhost:5000';

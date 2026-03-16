@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 
 // TODO: Use environment variable for API URL
 const API_URL = 'http://localhost:5000';
