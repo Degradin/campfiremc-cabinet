@@ -55,10 +55,9 @@ This will build and start the database, server, and client. The database will be
 
 - Connect to the new database (`\c campfiremc`) and run the contents of `server/init.sql` to create the necessary tables.
 
-**2. Backend Setup:**
+**2. Application Setup:**
 
-- Navigate to the `server/` directory.
-- Create a `.env` file and configure it to connect to your local database:
+- **Environment:** Create a `.env` file in the `server/` directory and configure it to connect to your local database:
 
   ```env
   DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/campfiremc"
@@ -66,22 +65,13 @@ This will build and start the database, server, and client. The database will be
   JWT_SECRET="your-super-secret-key-change-me"
   ```
 
-- Install dependencies and start the server:
+- **Install & Run:** From the root directory of the project, run the following commands:
 
   ```bash
-  cd server
-  npm install
-  npm start
-  ```
+  # Install dependencies for server, client, and root
+  npm run install:all
 
-**3. Frontend Setup:**
-
-- In a new terminal, navigate to the `client/` directory.
-- Install dependencies and start the client:
-
-  ```bash
-  cd client
-  npm install
+  # Start both server and client concurrently
   npm start
   ```
 
