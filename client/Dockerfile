@@ -3,6 +3,9 @@ FROM node:18-alpine AS build
 
 WORKDIR /usr/src/app
 
+# Set NODE_PATH to src to allow absolute imports
+ENV NODE_PATH=src
+
 COPY package*.json ./
 
 RUN npm install
@@ -16,6 +19,7 @@ FROM nginx:stable-alpine
 
 COPY --from=build /usr/src/app/build /usr/share/nginx/html
 
-EXPOSE 3000
+# Nginx listens on port 80 by default
+EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
