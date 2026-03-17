@@ -99,11 +99,18 @@ router.get('/:uuid', async (req, res) => {
             const baseUrl = `${req.protocol}://${req.get('host')}`;
 
             // Verify file existence before adding to response
-            if (skin_path && fs.existsSync(path.join(__dirname, '..', skin_path))) {
+            const skinDiskPath = path.join(__dirname, '..', skin_path);
+            if (skin_path && fs.existsSync(skinDiskPath)) {
                 textures.SKIN = { url: `${baseUrl}${skin_path}` };
+            } else if (skin_path) {
+                console.warn(`Skin file not found on disk: ${skinDiskPath}`);
             }
-            if (cape_path && fs.existsSync(path.join(__dirname, '..', cape_path))) {
+
+            const capeDiskPath = path.join(__dirname, '..', cape_path);
+            if (cape_path && fs.existsSync(capeDiskPath)) {
                 textures.CAPE = { url: `${baseUrl}${cape_path}` };
+            } else if (cape_path) {
+                console.warn(`Cape file not found on disk: ${capeDiskPath}`);
             }
         }
 
