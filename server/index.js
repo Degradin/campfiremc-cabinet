@@ -1,9 +1,19 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const fs = require('fs');
+const path = require('path');
 const initializeDatabase = require('./initDb');
 
 dotenv.config();
+
+// Create upload directories if they don't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+const skinsDir = path.join(uploadsDir, 'skins');
+const capesDir = path.join(uploadsDir, 'capes');
+if (!fs.existsSync(skinsDir)) fs.mkdirSync(skinsDir, { recursive: true });
+if (!fs.existsSync(capesDir)) fs.mkdirSync(capesDir, { recursive: true });
+
 initializeDatabase();
 
 const authRoutes = require('./routes/auth');

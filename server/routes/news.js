@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const { query, dbType } = require('../db');
 
 // GET /news - Get all news articles
 router.get('/', async (req, res) => {
   try {
-    const result = await db.query('SELECT id, title, content, created_at FROM news ORDER BY created_at DESC');
+    const result = await query('SELECT id, title, content, created_at FROM news ORDER BY created_at DESC');
     // GML-Launcher expects an array of {id, title, content}
     const news = result.rows.map(item => ({ id: item.id, title: item.title, content: item.content }));
     res.json(news);
@@ -25,11 +25,22 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        const newNews = await db.query(
-            'INSERT INTO news (title, content, author_id) VALUES ($1, $2, $3) RETURNING *',
-            [title, content, author_id]
-        );
-        res.status(201).json(newNews.rows[0]);
+        const insertQuery = dbType === 'postgres'
+            ? 'INSERT INTO news (title, content, author_id) VALUES ($1, $2, $3) RETURNING *'
+            : 'INSERT INTO news (title, content, author_id) VALUES ($1, $2, $3)';
+
+        const insertResult = await query(insertQuery, [title, content, author_id]);
+
+        let newNews;
+        if (dbType === 'postgres') {
+            newNews = insertResult.rows[0];
+        } else {
+            // For SQLite, fetch the news item we just inserted
+            const newsResult = await query('SELECT * FROM news ORDER BY id DESC LIMIT 1');
+            newNews = newsResult.rows[0];
+        }
+
+        res.status(201).json(newNews);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal server error' });
@@ -42,7 +53,7 @@ router.delete('/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const result = await db.query('DELETE FROM news WHERE id = $1 RETURNING id', [id]);
+        const result = await query('DELETE FROM news WHERE id = $1', [id]);
         if (result.rowCount === 0) {
             return res.status(404).json({ error: 'News article not found' });
         }
