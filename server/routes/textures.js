@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const db = require('../db');
+const { query, dbType } = require('../db');
 const path = require('path');
+const fs = require('fs');
 const jwt = require('jsonwebtoken');
 
 // TODO: Move this to a .env file
@@ -59,14 +60,18 @@ router.post('/upload', verifyToken, upload.fields([{ name: 'skin', maxCount: 1 }
             capePath = `/uploads/capes/${userUuid}${path.extname(req.files.cape[0].originalname)}`;
         }
 
-        // Upsert logic: Insert or update texture paths
-        await db.query(
-            `INSERT INTO user_textures (user_id, skin_path, cape_path) 
-             VALUES ($1, $2, $3) 
-             ON CONFLICT (user_id) 
-             DO UPDATE SET skin_path = COALESCE($2, user_textures.skin_path), cape_path = COALESCE($3, user_textures.cape_path)`,
-            [userId, skinPath, capePath]
-        );
+        // Upsert logic for both Postgres and SQLite
+        const existingTexture = await query('SELECT * FROM user_textures WHERE user_id = $1', [userId]);
+
+        if (existingTexture.rows.length > 0) {
+            // Update existing record
+            const newSkinPath = skinPath || existingTexture.rows[0].skin_path;
+            const newCapePath = capePath || existingTexture.rows[0].cape_path;
+            await query('UPDATE user_textures SET skin_path = $1, cape_path = $2 WHERE user_id = $3', [newSkinPath, newCapePath, userId]);
+        } else {
+            // Insert new record
+            await query('INSERT INTO user_textures (user_id, skin_path, cape_path) VALUES ($1, $2, $3)', [userId, skinPath, capePath]);
+        }
 
         res.status(200).json({ message: 'Textures uploaded successfully', skin: skinPath, cape: capePath });
     } catch (error) {
@@ -80,23 +85,24 @@ router.get('/:uuid', async (req, res) => {
     const { uuid } = req.params;
 
     try {
-        const userResult = await db.query('SELECT id FROM users WHERE uuid = $1', [uuid]);
+        const userResult = await query('SELECT id FROM users WHERE uuid = $1', [uuid]);
         if (userResult.rows.length === 0) {
             return res.status(404).json({ error: 'User not found' });
         }
         const userId = userResult.rows[0].id;
 
-        const texturesResult = await db.query('SELECT skin_path, cape_path FROM user_textures WHERE user_id = $1', [userId]);
+        const texturesResult = await query('SELECT skin_path, cape_path FROM user_textures WHERE user_id = $1', [userId]);
         
         const textures = {};
         if (texturesResult.rows.length > 0) {
             const { skin_path, cape_path } = texturesResult.rows[0];
             const baseUrl = `${req.protocol}://${req.get('host')}`;
 
-            if (skin_path) {
+            // Verify file existence before adding to response
+            if (skin_path && fs.existsSync(path.join(__dirname, '..', skin_path))) {
                 textures.SKIN = { url: `${baseUrl}${skin_path}` };
             }
-            if (cape_path) {
+            if (cape_path && fs.existsSync(path.join(__dirname, '..', cape_path))) {
                 textures.CAPE = { url: `${baseUrl}${cape_path}` };
             }
         }
