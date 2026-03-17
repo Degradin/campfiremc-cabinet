@@ -17,7 +17,7 @@ const Layout = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="border-b">
+      <header className="shadow-sm">
         <div className="container mx-auto flex justify-between items-center p-4">
           <Link to="/" className="text-xl font-bold">{t('brand')}</Link>
           <nav className="flex gap-4 items-center">
@@ -43,7 +43,7 @@ const Layout = () => {
       <main className="container mx-auto p-4 flex-grow">
         <Outlet />
       </main>
-      <footer className="border-t py-4">
+      <footer className="py-4">
         <div className="container mx-auto text-center text-muted-foreground">
           <p>{t('footer_text', { year: new Date().getFullYear() })}</p>
         </div>

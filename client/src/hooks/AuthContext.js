@@ -31,8 +31,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     const response = await axios.post(`${API_URL}/auth/authenticate`, { username, password });
     const { accessToken, selectedProfile } = response.data;
-    localStorage.setItem('token', accessToken);
-    setUser({ id: selectedProfile.id, uuid: selectedProfile.id, name: selectedProfile.name, token: accessToken });
+    const userData = { ...selectedProfile, token: accessToken };
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
     return response.data;
   };
 
@@ -41,7 +42,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setUser(null);
   };
 

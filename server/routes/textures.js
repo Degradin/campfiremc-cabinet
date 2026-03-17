@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { query, dbType } = require('../db');
+const { query } = require('../db');
+const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
-const jwt = require('jsonwebtoken');
-
-// TODO: Move this to a .env file
-const JWT_SECRET = 'your-super-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Middleware to verify JWT
 // TODO: Move this to a separate middleware file
@@ -27,38 +25,36 @@ const verifyToken = (req, res, next) => {
     });
 };
 
-// Multer storage configuration
+// Multer storage configuration (disk)
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        if (file.fieldname === 'skin') {
-            cb(null, 'uploads/skins/');
-        } else if (file.fieldname === 'cape') {
-            cb(null, 'uploads/capes/');
-        }
+        const uploadPath = path.join(__dirname, '..', 'public', 'uploads', file.fieldname === 'skin' ? 'skins' : 'capes');
+        fs.mkdirSync(uploadPath, { recursive: true });
+        cb(null, uploadPath);
     },
     filename: function (req, file, cb) {
-        // Name files after the user's UUID to ensure uniqueness
-        cb(null, req.user.uuid + path.extname(file.originalname));
+        const userUuid = req.user.uuid;
+        cb(null, userUuid + path.extname(file.originalname));
     }
 });
-
 const upload = multer({ storage: storage });
 
 // POST /textures/upload - Upload skin and cape
 router.post('/upload', verifyToken, upload.fields([{ name: 'skin', maxCount: 1 }, { name: 'cape', maxCount: 1 }]), async (req, res) => {
     const userId = req.user.id;
-    const userUuid = req.user.uuid;
 
     try {
-        let skinPath = null;
-        let capePath = null;
+        const getFileUrl = (fileArray) => {
+            if (!fileArray || fileArray.length === 0) return null;
+            const file = fileArray[0];
+            // The server will serve static files from the 'public' directory.
+            // The URL path will start after 'public'.
+            const filePath = file.path.split('public')[1].replace(/\\/g, '/');
+            return filePath;
+        };
 
-        if (req.files.skin) {
-            skinPath = `/uploads/skins/${userUuid}${path.extname(req.files.skin[0].originalname)}`;
-        }
-        if (req.files.cape) {
-            capePath = `/uploads/capes/${userUuid}${path.extname(req.files.cape[0].originalname)}`;
-        }
+        const skinPath = getFileUrl(req.files.skin);
+        const capePath = getFileUrl(req.files.cape);
 
         // Upsert logic for both Postgres and SQLite
         const existingTexture = await query('SELECT * FROM user_textures WHERE user_id = $1', [userId]);
@@ -96,21 +92,13 @@ router.get('/:uuid', async (req, res) => {
         const textures = {};
         if (texturesResult.rows.length > 0) {
             const { skin_path, cape_path } = texturesResult.rows[0];
-            const baseUrl = `${req.protocol}://${req.get('host')}`;
 
-            // Verify file existence before adding to response
-            const skinDiskPath = path.join(__dirname, '..', skin_path);
-            if (skin_path && fs.existsSync(skinDiskPath)) {
-                textures.SKIN = { url: `${baseUrl}${skin_path}` };
-            } else if (skin_path) {
-                console.warn(`Skin file not found on disk: ${skinDiskPath}`);
+            if (skin_path) {
+                textures.SKIN = { url: skin_path };
             }
 
-            const capeDiskPath = path.join(__dirname, '..', cape_path);
-            if (cape_path && fs.existsSync(capeDiskPath)) {
-                textures.CAPE = { url: `${baseUrl}${cape_path}` };
-            } else if (cape_path) {
-                console.warn(`Cape file not found on disk: ${capeDiskPath}`);
+            if (cape_path) {
+                textures.CAPE = { url: cape_path };
             }
         }
 

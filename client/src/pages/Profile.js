@@ -24,9 +24,11 @@ const Profile = () => {
         try {
           const response = await axios.get(`${API_URL}/textures/${user.uuid}`);
           const textureData = JSON.parse(atob(response.data.properties[0].value));
+          const skinUrl = textureData.textures.SKIN?.url ? `${API_URL}${textureData.textures.SKIN.url}` : null;
+          const capeUrl = textureData.textures.CAPE?.url ? `${API_URL}${textureData.textures.CAPE.url}` : null;
           setCurrentUserTextures({
-            skin: textureData.textures.SKIN?.url || null,
-            cape: textureData.textures.CAPE?.url || null,
+            skin: skinUrl,
+            cape: capeUrl,
           });
         } catch (err) {
           console.error('Failed to fetch user textures', err);
@@ -74,9 +76,13 @@ const Profile = () => {
         },
       });
       setSuccess(response.data.message || 'Textures uploaded successfully!');
-      // Refresh textures
-      if(response.data.skin) setCurrentUserTextures(prev => ({...prev, skin: response.data.skin}));
-      if(response.data.cape) setCurrentUserTextures(prev => ({...prev, cape: response.data.cape}));
+      // Refresh textures with full URL
+      if (response.data.skin) {
+        setCurrentUserTextures(prev => ({ ...prev, skin: `${API_URL}${response.data.skin}` }));
+      }
+      if (response.data.cape) {
+        setCurrentUserTextures(prev => ({ ...prev, cape: `${API_URL}${response.data.cape}` }));
+      }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to upload textures.');
     } finally {
