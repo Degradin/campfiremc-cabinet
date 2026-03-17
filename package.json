@@ -7,12 +7,11 @@
     "install:client": "npm install --prefix client",
     "install:all": "npm run install:server && npm run install:client",
     "start:server": "node server/index.js",
-    "start:client": "cross-env NODE_PATH=src npm start --prefix client",
+    "start:client": "npm start --prefix client",
     "start": "npx concurrently \"npm run start:server\" \"npm run start:client\"",
     "dev": "npm start"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "cross-env": "^10.1.0"
+    "concurrently": "^8.2.2"
   }
 }
