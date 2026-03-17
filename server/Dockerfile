@@ -17,6 +17,8 @@ WORKDIR /usr/src/app
 COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app ./
 
+RUN mkdir -p public/uploads
+
 EXPOSE 5000
 
 CMD [ "node", "index.js" ]
