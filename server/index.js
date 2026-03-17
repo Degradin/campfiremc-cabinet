@@ -1,8 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const initializeDatabase = require('./initDb');
 
 dotenv.config();
+initializeDatabase();
 
 const authRoutes = require('./routes/auth');
 const newsRoutes = require('./routes/news');

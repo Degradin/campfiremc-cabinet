@@ -37,43 +37,34 @@ This will build and start the database, server, and client. The database will be
 
 ### Running Locally (Without Docker)
 
+This setup uses **SQLite** for the database, which is created and initialized automatically. No external database server is required.
+
 **Prerequisites:**
 - [Node.js](https://nodejs.org/) (v18 or later)
 - [npm](https://www.npmjs.com/)
-- [PostgreSQL](https://www.postgresql.org/download/)
 
-**1. Database Setup:**
+**1. Environment Configuration:**
 
-- Ensure PostgreSQL is installed and running.
-- Create a new database, user, and password. For example, using `psql`:
+Create a `.env` file in the `server/` directory. You only need to set the `PORT` and `JWT_SECRET`. The `DATABASE_URL` is not needed for the local SQLite setup.
 
-  ```sql
-  CREATE DATABASE campfiremc;
-  CREATE USER myuser WITH ENCRYPTED PASSWORD 'mypassword';
-  GRANT ALL PRIVILEGES ON DATABASE campfiremc TO myuser;
-  ```
+```env
+PORT=5000
+JWT_SECRET="your-super-secret-key-change-me"
+```
 
-- Connect to the new database (`\c campfiremc`) and run the contents of `server/init.sql` to create the necessary tables.
+**2. Install & Run:**
 
-**2. Application Setup:**
+From the root directory of the project, run the following commands:
 
-- **Environment:** Create a `.env` file in the `server/` directory and configure it to connect to your local database:
+```bash
+# Install dependencies for all services
+npm run install:all
 
-  ```env
-  DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/campfiremc"
-  PORT=5000
-  JWT_SECRET="your-super-secret-key-change-me"
-  ```
+# Start both server and client concurrently
+npm start
+```
 
-- **Install & Run:** From the root directory of the project, run the following commands:
-
-  ```bash
-  # Install dependencies for server, client, and root
-  npm run install:all
-
-  # Start both server and client concurrently
-  npm start
-  ```
+The first time you run this, a `campfiremc.db` file will be created in the `server/` directory.
 
 ### Accessing the Application
 
