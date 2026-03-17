@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
-const db = require('../db');
+const { query, dbType } = require('../db');
 
 const router = express.Router();
 
@@ -21,14 +21,25 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const userUuid = uuidv4();
 
-    const newUser = await db.query(
-      'INSERT INTO users (uuid, username, email, password) VALUES ($1, $2, $3, $4) RETURNING id, uuid, username',
-      [userUuid, username, email, hashedPassword]
-    );
+    const insertQuery = dbType === 'postgres'
+      ? 'INSERT INTO users (uuid, username, email, password) VALUES ($1, $2, $3, $4) RETURNING id, uuid, username'
+      : 'INSERT INTO users (uuid, username, email, password) VALUES ($1, $2, $3, $4)';
 
-    res.status(201).json(newUser.rows[0]);
+    const insertResult = await query(insertQuery, [userUuid, username, email, hashedPassword]);
+
+    let registeredUser;
+    if (dbType === 'postgres') {
+      registeredUser = insertResult.rows[0];
+    } else {
+      // For SQLite, fetch the user we just inserted
+      const userResult = await query('SELECT id, uuid, username FROM users WHERE uuid = $1', [userUuid]);
+      registeredUser = userResult.rows[0];
+    }
+
+    res.status(201).json(registeredUser);
   } catch (error) {
-    if (error.code === '23505') { // unique_violation
+    // Handle unique constraint errors for both PostgreSQL and SQLite
+    if ((dbType === 'postgres' && error.code === '23505') || (dbType === 'sqlite' && error.code === 'SQLITE_CONSTRAINT')) {
       return res.status(409).json({ error: 'User with this username or email already exists' });
     }
     console.error(error);
@@ -45,7 +56,7 @@ router.post('/authenticate', async (req, res) => {
   }
 
   try {
-    const result = await db.query('SELECT * FROM users WHERE username = $1', [username]);
+    const result = await query('SELECT * FROM users WHERE username = $1', [username]);
     const user = result.rows[0];
 
     if (!user) {
@@ -60,7 +71,7 @@ router.post('/authenticate', async (req, res) => {
 
     const accessToken = jwt.sign({ id: user.id, uuid: user.uuid }, JWT_SECRET, { expiresIn: '1h' });
 
-    await db.query('UPDATE users SET access_token = $1, client_token = $2 WHERE id = $3', [accessToken, clientToken, user.id]);
+    await query('UPDATE users SET access_token = $1, client_token = $2 WHERE id = $3', [accessToken, clientToken, user.id]);
 
     const response = {
       accessToken,
