@@ -1,6 +1,7 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/AuthContext';
 import { Button } from './ui/button';
+import { ThemeToggle } from './ThemeToggle';
 
 const Layout = () => {
   const { isAuthenticated, logout } = useAuth();
@@ -31,6 +32,7 @@ const Layout = () => {
                 <Link to="/register" className="hover:text-primary">Register</Link>
               </>
             )}
+            <ThemeToggle />
           </nav>
         </div>
       </header>
