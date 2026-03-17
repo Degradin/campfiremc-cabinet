@@ -1,0 +1,10 @@
+{
+  "Home": "Главная",
+  "Profile": "Профиль",
+  "Admin": "Админ",
+  "Logout": "Выйти",
+  "Login": "Войти",
+  "Register": "Регистрация",
+  "brand": "CampFireMC",
+  "footer_text": "© {{year}} CampFireMC. Все права защищены."
+}

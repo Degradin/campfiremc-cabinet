@@ -1,0 +1,10 @@
+{
+  "Home": "Home",
+  "Profile": "Profile",
+  "Admin": "Admin",
+  "Logout": "Logout",
+  "Login": "Login",
+  "Register": "Register",
+  "brand": "CampFireMC",
+  "footer_text": "© {{year}} CampFireMC. All rights reserved."
+}

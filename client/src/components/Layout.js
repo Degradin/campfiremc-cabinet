@@ -1,9 +1,12 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { Button } from './ui/button';
 import { ThemeToggle } from './ThemeToggle';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 const Layout = () => {
+  const { t } = useTranslation();
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -16,22 +19,23 @@ const Layout = () => {
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <header className="border-b">
         <div className="container mx-auto flex justify-between items-center p-4">
-          <Link to="/" className="text-xl font-bold">CampFireMC</Link>
+          <Link to="/" className="text-xl font-bold">{t('brand')}</Link>
           <nav className="flex gap-4 items-center">
-            <Link to="/" className="hover:text-primary">Home</Link>
+            <Link to="/" className="hover:text-primary">{t('Home')}</Link>
             {isAuthenticated ? (
               <>
-                <Link to="/profile" className="hover:text-primary">Profile</Link>
+                <Link to="/profile" className="hover:text-primary">{t('Profile')}</Link>
                 {/* TODO: Add role-based access for admin link */}
-                <Link to="/admin" className="hover:text-primary">Admin</Link>
-                <Button variant="ghost" onClick={handleLogout}>Logout</Button>
+                <Link to="/admin" className="hover:text-primary">{t('Admin')}</Link>
+                <Button variant="ghost" onClick={handleLogout}>{t('Logout')}</Button>
               </>
             ) : (
               <>
-                <Link to="/login" className="hover:text-primary">Login</Link>
-                <Link to="/register" className="hover:text-primary">Register</Link>
+                <Link to="/login" className="hover:text-primary">{t('Login')}</Link>
+                <Link to="/register" className="hover:text-primary">{t('Register')}</Link>
               </>
             )}
+            <LanguageSwitcher />
             <ThemeToggle />
           </nav>
         </div>
@@ -41,7 +45,7 @@ const Layout = () => {
       </main>
       <footer className="border-t py-4">
         <div className="container mx-auto text-center text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} CampFireMC. All rights reserved.</p>
+          <p>{t('footer_text', { year: new Date().getFullYear() })}</p>
         </div>
       </footer>
     </div>
