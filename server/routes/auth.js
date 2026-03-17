@@ -10,10 +10,10 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // POST /auth/register
 router.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!username || !email || !password) {
-    return res.status(400).json({ error: 'Username, email, and password are required' });
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password are required' });
   }
 
   try {
@@ -21,10 +21,10 @@ router.post('/register', async (req, res) => {
     const userUuid = uuidv4();
 
     const insertQuery = dbType === 'postgres'
-      ? 'INSERT INTO users (uuid, username, email, password) VALUES ($1, $2, $3, $4) RETURNING id, uuid, username'
-      : 'INSERT INTO users (uuid, username, email, password) VALUES ($1, $2, $3, $4)';
+      ? 'INSERT INTO users (uuid, username, password) VALUES ($1, $2, $3) RETURNING id, uuid, username'
+      : 'INSERT INTO users (uuid, username, password) VALUES ($1, $2, $3)';
 
-    const insertResult = await query(insertQuery, [userUuid, username, email, hashedPassword]);
+    const insertResult = await query(insertQuery, [userUuid, username, hashedPassword]);
 
     let registeredUser;
     if (dbType === 'postgres') {
@@ -39,7 +39,7 @@ router.post('/register', async (req, res) => {
   } catch (error) {
     // Handle unique constraint errors for both PostgreSQL and SQLite
     if ((dbType === 'postgres' && error.code === '23505') || (dbType === 'sqlite' && error.code === 'SQLITE_CONSTRAINT')) {
-      return res.status(409).json({ error: 'User with this username or email already exists' });
+      return res.status(409).json({ error: 'User with this username already exists' });
     }
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });

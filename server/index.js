@@ -26,7 +26,11 @@ const texturesRoutes = require('./routes/textures');
 
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: 'http://144.31.7.171:3002',
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 

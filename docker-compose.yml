@@ -31,11 +31,11 @@ services:
     build: ./client
     restart: always
     ports:
-      - "3000:3000"
+      - "3000:80"
     depends_on:
       - server
     environment:
-      REACT_APP_API_URL: http://localhost:5000
+      REACT_APP_API_URL: http://144.31.7.171:5000
 
 volumes:
   postgres_data:

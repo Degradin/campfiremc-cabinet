@@ -3,7 +3,6 @@ CREATE TABLE users (
     uuid VARCHAR(36) UNIQUE NOT NULL,
     username VARCHAR(16) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
     access_token VARCHAR(255),
     client_token VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

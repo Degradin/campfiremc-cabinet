@@ -8,7 +8,6 @@ import { Label } from '../components/ui/label';
 
 const Register = () => {
   const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,14 +19,14 @@ const Register = () => {
     setError('');
     setLoading(true);
 
-    if (!username || !email || !password) {
+    if (!username || !password) {
       setError('All fields are required.');
       setLoading(false);
       return;
     }
 
     try {
-      await register(username, email, password);
+      await register(username, password);
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to register. Please try again.');
@@ -55,17 +54,6 @@ const Register = () => {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="grid gap-2">
