@@ -9,6 +9,7 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.13.6",
+    "campfiremc-cabinet-root": "file:..",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.577.0",
@@ -24,7 +25,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "clear-cache": "powershell -Command \"Remove-Item -Recurse -Force -Path node_modules/.cache -ErrorAction SilentlyContinue\""
   },
   "eslintConfig": {
     "extends": [
